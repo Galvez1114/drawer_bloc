@@ -1,3 +1,5 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 class Datos {
   final int numeroInicial;
   final String colorAlerta;
@@ -23,7 +25,20 @@ class cambioDeColor extends Evento {
 class cambioANumero extends Evento {}
 
 class cambioDeNumero extends Evento {
-  final int numeroInicial;
+  late final int numeroInicial;
 
   cambioDeNumero({required this.numeroInicial});
+}
+
+enum Estados { numeroSeleccionado, colorSeleccionado }
+
+class OpcionesBloc extends Bloc<Evento, Estados> {
+  OpcionesBloc() : super(Estados.numeroSeleccionado) {
+    on<CambioAColor>((event, emit) {
+      emit(Estados.colorSeleccionado);
+    });
+    on<cambioANumero>((event, emit) {
+      emit(Estados.numeroSeleccionado);
+    });
+  }
 }
