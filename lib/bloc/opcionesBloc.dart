@@ -1,9 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Datos {
-  final int numeroInicial;
-  final String colorAlerta;
-  final String colorNormal;
+  int numeroInicial;
+  String colorAlerta;
+  String colorNormal;
 
   Datos(
       {required this.numeroInicial,
@@ -22,22 +23,34 @@ class cambioDeColor extends Evento {
   cambioDeColor({required this.colorAlerta, required this.colorNormal});
 }
 
-class cambioANumero extends Evento {}
+class CambioANumero extends Evento {}
 
-class cambioDeNumero extends Evento {
+class CambioDeNumero extends Evento {
   late final int numeroInicial;
 
-  cambioDeNumero({required this.numeroInicial});
+  CambioDeNumero({required this.numeroInicial});
 }
 
-enum Estados { numeroSeleccionado, colorSeleccionado }
+class YaInicializado extends Evento {}
+
+enum Estados { numeroSeleccionado, colorSeleccionado, inicial }
 
 class OpcionesBloc extends Bloc<Evento, Estados> {
-  OpcionesBloc() : super(Estados.numeroSeleccionado) {
+  late final SharedPreferencesAsync prefs;
+  Datos datos = Datos(numeroInicial: 0, colorAlerta: '', colorNormal: '');
+  OpcionesBloc() : super(Estados.inicial) {
     on<CambioAColor>((event, emit) {
       emit(Estados.colorSeleccionado);
     });
-    on<cambioANumero>((event, emit) {
+    on<CambioANumero>((event, emit) {
+      emit(Estados.numeroSeleccionado);
+    });
+    on<CambioDeNumero>(
+      (event, emit) {},
+    );
+    on<YaInicializado>((event, emit) async {
+      prefs = SharedPreferencesAsync();
+      int numero = await prefs.getInt('numeroinicial') ?? 0;
       emit(Estados.numeroSeleccionado);
     });
   }
