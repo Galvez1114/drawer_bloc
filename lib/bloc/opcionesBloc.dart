@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+const String numeroInicial = 'numeroinicial';
+
 class Datos {
   int numeroInicial;
   String colorAlerta;
@@ -23,6 +25,8 @@ class cambioDeColor extends Evento {
   cambioDeColor({required this.colorAlerta, required this.colorNormal});
 }
 
+class YaInicializado extends Evento {}
+
 class CambioANumero extends Evento {}
 
 class CambioDeNumero extends Evento {
@@ -30,8 +34,6 @@ class CambioDeNumero extends Evento {
 
   CambioDeNumero({required this.numeroInicial});
 }
-
-class YaInicializado extends Evento {}
 
 enum Estados { numeroSeleccionado, colorSeleccionado, inicial }
 
@@ -46,11 +48,13 @@ class OpcionesBloc extends Bloc<Evento, Estados> {
       emit(Estados.numeroSeleccionado);
     });
     on<CambioDeNumero>(
-      (event, emit) {},
+      (event, emit) {
+        prefs.setInt(numeroInicial, event.numeroInicial);
+      },
     );
     on<YaInicializado>((event, emit) async {
       prefs = SharedPreferencesAsync();
-      int numero = await prefs.getInt('numeroinicial') ?? 0;
+      int numero = await prefs.getInt(numeroInicial) ?? 0;
       emit(Estados.numeroSeleccionado);
     });
   }
