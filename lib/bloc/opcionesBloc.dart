@@ -50,11 +50,13 @@ class OpcionesBloc extends Bloc<Evento, Estados> {
     on<CambioDeNumero>(
       (event, emit) {
         prefs.setInt(numeroInicial, event.numeroInicial);
+        datos.numeroInicial = event.numeroInicial;
       },
     );
     on<YaInicializado>((event, emit) async {
       prefs = SharedPreferencesAsync();
       int numero = await prefs.getInt(numeroInicial) ?? 0;
+      datos.numeroInicial = numero;
       emit(Estados.numeroSeleccionado);
     });
   }
