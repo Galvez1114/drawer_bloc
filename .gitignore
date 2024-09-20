@@ -48,4 +48,4 @@ app.*.map.json
 /windows
 
 pubspec.lock
-macos/Flutter/GeneratedPluginRegistrant.swift
+/macos/Flutter/GeneratedPluginRegistrant.swift
