@@ -1,13 +1,16 @@
-import 'dart:js';
-
 import 'package:drawer_bloc/bloc/opcionesBloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 void main() {
-  runApp(BlocProvider(
-    create: (context) => OpcionesBloc()..add(YaInicializado()),
+  runApp(MultiBlocProvider(
+    providers: [
+      BlocProvider(
+        create: (context) => OpcionesBloc()..add(YaInicializado()),
+      ),
+    ],
     child: const MainApp(),
   ));
 }
@@ -17,19 +20,14 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: Scaffold(
-        body: Center(
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.6,
-            height: MediaQuery.of(context).size.width * 0.3,
-            decoration: BoxDecoration(border: Border.all(color: Colors.green)),
-            child: const Row(
-              children: [
-                Opciones(),
-                Parametros(),
-              ],
-            ),
+        body: Expanded(
+          child: Row(
+            children: [
+              Opciones(),
+              Parametros(),
+            ],
           ),
         ),
       ),
@@ -45,6 +43,7 @@ class Opciones extends StatelessWidget {
     var estado = context.watch<OpcionesBloc>().state;
     return Expanded(
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           ListTile(
             selected: estado == Estados.numeroSeleccionado,
@@ -126,7 +125,155 @@ class OpcionesColor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    return const TextField();
+    return BlocConsumer<OpcionesBloc, Estados>(
+      listener: (context, state) {},
+      builder: (context, state) {
+        return const Expanded(
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [ColorPickerAlerta(), ColorPickerNormal()],
+        ));
+      },
+    );
+  }
+}
+
+class ColorPickerNormal extends StatefulWidget {
+  const ColorPickerNormal({
+    super.key,
+  });
+
+  @override
+  State<ColorPickerNormal> createState() => _ColorPickerNormalState();
+}
+
+class _ColorPickerNormalState extends State<ColorPickerNormal> {
+  @override
+  Widget build(BuildContext context) {
+    Color colorNormal =
+        stringToColor(context.watch<OpcionesBloc>().datos.colorNormal);
+    return ElevatedButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: const Text('Elige el color de rango normal!'),
+                content: SingleChildScrollView(
+                    child: ColorPicker(
+                  pickerColor: colorNormal,
+                  onColorChanged: (value) {
+                    context
+                        .read<OpcionesBloc>()
+                        .add(cambioDeColorNormal(colorNormal: value));
+                    setState(() {
+                      colorNormal = value;
+                    });
+                  },
+                )),
+                actions: const [BotonCerrarAlertDialog()],
+              );
+            },
+          );
+        },
+        child: CuerpoBotonColorPicker(
+            elColor: colorNormal, mensaje: 'Color normal'));
+  }
+}
+
+class BotonCerrarAlertDialog extends StatelessWidget {
+  const BotonCerrarAlertDialog({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+        child: const Text('Guardar'));
+  }
+}
+
+class ColorPickerAlerta extends StatefulWidget {
+  const ColorPickerAlerta({super.key});
+
+  @override
+  State<ColorPickerAlerta> createState() => _ColorPickerAlertaState();
+}
+
+class _ColorPickerAlertaState extends State<ColorPickerAlerta> {
+  @override
+  Widget build(BuildContext context) {
+    Color colorAlerta =
+        stringToColor(context.watch<OpcionesBloc>().datos.colorAlerta);
+    return ElevatedButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                  title: const Text('Elige el color de alerta!'),
+                  content: SingleChildScrollView(
+                      child: ColorPicker(
+                    pickerColor: colorAlerta,
+                    onColorChanged: (value) {
+                      context
+                          .read<OpcionesBloc>()
+                          .add(cambioDeColorAlerta(colorAlerta: value));
+                      setState(() {
+                        colorAlerta = value;
+                      });
+                    },
+                  )),
+                  actions: const [BotonCerrarAlertDialog()]);
+            },
+          );
+        },
+        child: CuerpoBotonColorPicker(
+            elColor: colorAlerta, mensaje: 'Color de alerta'));
+  }
+}
+
+class CuerpoBotonColorPicker extends StatelessWidget {
+  const CuerpoBotonColorPicker({
+    super.key,
+    required this.elColor,
+    required this.mensaje,
+  });
+
+  final Color elColor;
+  final String mensaje;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          Text(
+            mensaje,
+          ),
+          CircleAvatar(
+            backgroundColor: elColor,
+            maxRadius: 15,
+          )
+        ],
+      ),
+    );
+  }
+}
+
+Color stringToColor(String hexColor) {
+  hexColor = hexColor.replaceFirst('#', '');
+  if (hexColor.length == 6) {
+    hexColor = 'FF$hexColor'; // Añadir canal alfa si es necesario
+  }
+  if (hexColor.length > 4) {
+    print('se intentó xd');
+    return Color(int.parse(hexColor, radix: 16)).withOpacity(1.0);
+  } else {
+    return const Color(0xff443a49);
   }
 }
