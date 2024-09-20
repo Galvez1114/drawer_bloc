@@ -42,4 +42,10 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+#Nuevas cosas por ignorar.
+/linux
 /macos
+/windows
+
+pubspec.lock
+/macos/Flutter/GeneratedPluginRegistrant.swift
