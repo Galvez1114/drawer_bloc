@@ -4,6 +4,7 @@ import 'package:drawer_bloc/bloc/opcionesBloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 void main() {
   runApp(BlocProvider(
@@ -126,7 +127,74 @@ class OpcionesColor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    return const TextField();
+    var bloc = context.watch<OpcionesBloc>();
+    Color colorNormal = bloc.datos.colorNormal.toColor() ?? Colors.blue;
+    Color colorAlerta = bloc.datos.colorAlerta.toColor() ?? Colors.blue;
+    return BlocConsumer<OpcionesBloc, Estados>(
+      listener: (context, state) {},
+      builder: (context, state) {
+        return Expanded(
+            child: Column(children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      actions: [
+                        ColorPicker(
+                          pickerColor: colorNormal,
+                          onColorChanged: (value) => colorNormal = value,
+                        ),
+                        ElevatedButton(
+                            onPressed: () {
+                              context.read<OpcionesBloc>().add(CambioDeColor(
+                                  colorAlerta: colorAlerta.toHexString(),
+                                  colorNormal: colorNormal.toHexString()));
+                              Navigator.of(context, rootNavigator: true).pop();
+                            },
+                            child: const Text("Guardar color"))
+                      ],
+                    );
+                  },
+                );
+              },
+              child: const Text("Color normal"),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      actions: [
+                        ColorPicker(
+                          pickerColor: colorAlerta,
+                          onColorChanged: (value) => colorAlerta = value,
+                        ),
+                        ElevatedButton(
+                            onPressed: () {
+                              context.read<OpcionesBloc>().add(CambioDeColor(
+                                  colorAlerta: colorAlerta.toHexString(),
+                                  colorNormal: colorNormal.toHexString()));
+                              Navigator.of(context, rootNavigator: true).pop();
+                            },
+                            child: const Text("Guardar color"))
+                      ],
+                    );
+                  },
+                );
+              },
+              child: const Text("Color Alerta"),
+            ),
+          ),
+        ]));
+      },
+    );
   }
 }
